@@ -1,4 +1,16 @@
 /*
+  By Srinivasa Raju Namburi
+  Last Modified: 2/20/2018
+  Added:
+  Support for multiple sensors - to read from sensors.
+  MQTT publish to server.
+  WiFi funcationalities
+  Other misc code.
+
+*/
+// Uses esphttpd for wifi configuration. Thanks to Jeroen Domburg.
+
+/*
  * ----------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
  * Jeroen Domburg <jeroen@spritesmods.com> wrote this file. As long as you retain
@@ -7,11 +19,6 @@
  * ----------------------------------------------------------------------------
  */
 
-/*
-This is example code for the esphttpd library. It's a small-ish demo showing off
-the server, including WiFi connection management capabilities, some IO and
-some pictures of cats.
-*/
 
 #include <esp8266.h>
 #include "httpd.h"
@@ -127,7 +134,8 @@ void ICACHE_FLASH_ATTR wifiConnectCb(uint8_t status)
 		MQTT_Disconnect(&mqttClient);
 	}
 }
-
+/* Motion sensor callback  
+*/
 void ICACHE_FLASH_ATTR motion_detected(unsigned pin, unsigned level)
 {
 	char motionMsg[20];
@@ -246,6 +254,7 @@ void ICACHE_FLASH_ATTR gasReadingsCb(void *args)
 	 }
 
 }
+/* Initializes sensors once configuration is recvd from the server */
 
 void ICACHE_FLASH_ATTR initializeSensors()
 {
@@ -510,7 +519,7 @@ void ICACHE_FLASH_ATTR mqttDataCb(uint32_t *args, const char* topic, uint32_t to
 			   break;
 		   }
 		   /*case 'u': for OTA update
-			   INFO("Recvd a relay command\n");
+			   INFO("Recvd a OTA command\n");
 			   float update = atof(configCommand);
 			   INFO("Rcvd relay state: %f",update);
 			   handleUpgrade(2,"asdf",45,"asdf");
@@ -638,14 +647,9 @@ if(!strcmp(configMode,"1"))
 	espFsInit((void*)(webpages_espfs_start));
 #endif
 	httpdInit(builtInUrls, 80);
-
-	/*os_timer_disarm(&websockTimer);
-	os_timer_setfn(&websockTimer, websockTimerCb, NULL);
-	os_timer_arm(&websockTimer, 1000, 1);*/
 }
 else
-{
-	/*Add by Raju Namburi */
+{	
 	INFO("Booting in working mode \n");
 	system_init_done_cb(&initDone_cb);
 }
